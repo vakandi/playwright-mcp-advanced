@@ -1,7 +1,7 @@
 {
-  "name": "@playwright/mcp",
-  "version": "0.0.47",
-  "description": "Playwright Tools for MCP",
+  "name": "@playwright/mcp-brave",
+  "version": "0.0.47-brave",
+  "description": "Playwright Tools for MCP with Brave Browser Support",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/microsoft/playwright-mcp.git"
@@ -17,6 +17,8 @@
   "scripts": {
     "lint": "npm run update-readme",
     "update-readme": "node update-readme.js",
+    "brave": "node cli-brave.js",
+    "sync-profile": "node sync-profile.js",
     "docker-build": "docker build --no-cache -t playwright-mcp-dev:latest .",
     "docker-rm": "docker rm playwright-mcp-dev",
     "docker-run": "docker run -it -p 8080:8080 --name playwright-mcp-dev playwright-mcp-dev:latest",
@@ -38,10 +40,13 @@
   },
   "dependencies": {
     "playwright": "1.57.0-alpha-2025-11-14",
-    "playwright-core": "1.57.0-alpha-2025-11-14"
+    "playwright-core": "1.57.0-alpha-2025-11-14",
+    "dotenv": "^16.4.5",
+    "fs-extra": "^11.2.0"
   },
   "bin": {
-    "mcp-server-playwright": "cli.js"
+    "mcp-server-playwright": "cli.js",
+    "mcp-server-playwright-brave": "cli-brave.js"
   },
   "devDependencies": {
     "@modelcontextprotocol/sdk": "^1.17.5",

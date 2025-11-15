@@ -1,0 +1,9 @@
+﻿{
+    "browser":  {
+                    "launchOptions":  {
+                                          "executablePath":  "C:\\Program Files\\BraveSoftware\\Brave-Browser\\Application\\brave.exe"
+                                      },
+                    "browserName":  "chromium",
+                    "userDataDir":  "C:\\MCP_Brave_Profile"
+                }
+}
