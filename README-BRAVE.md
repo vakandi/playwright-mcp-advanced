@@ -1,5 +1,10 @@
 # Playwright MCP Server - Brave Edition
 
+> **🔥 Forget about MCP Puppeteer, MCP BrowserMCP - they all suck!**  
+> **Playwright is the most stable one from hundreds of hours of testing.**  
+> **Now it has all your accounts available, extensions, and bookmarks.**  
+> **Cursor now has access to all your life. Enjoy! 🚀**
+
 A custom fork of the [Playwright MCP server](https://github.com/microsoft/playwright-mcp) that uses **Brave Browser** instead of Chromium, with support for persistent user profiles and automatic profile syncing.
 
 ## Features

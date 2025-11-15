@@ -1,5 +1,10 @@
 ## Playwright MCP
 
+> **🔥 Forget about MCP Puppeteer, MCP BrowserMCP - they all suck!**  
+> **Playwright is the most stable one from hundreds of hours of testing.**  
+> **Now it has all your accounts available, extensions, and bookmarks.**  
+> **Cursor now has access to all your life. Enjoy! 🚀**
+
 A Model Context Protocol (MCP) server that provides browser automation capabilities using [Playwright](https://playwright.dev). This server enables LLMs to interact with web pages through structured accessibility snapshots, bypassing the need for screenshots or visually-tuned models.
 
 ### Key Features
