@@ -151,8 +151,7 @@ async function syncBraveProfile(sourceProfile, destProfile) {
     
     // Check if source exists
     if (!fs.existsSync(expandedSource)) {
-      console.warn(`[MCP-PLAYWRIGHT] Source profile not found: ${expandedSource}`);
-      return;
+      throw new Error(`Source profile not found: ${expandedSource}. Check BRAVE_SOURCE_PROFILE environment variable.`);
     }
     
     // Check if hot sync is enabled and Brave is running
@@ -271,6 +270,7 @@ async function syncBraveProfile(sourceProfile, destProfile) {
       const dbFiles = [
         { name: 'Cookies', path: 'Network/Cookies' },
         { name: 'Cookies-journal', path: 'Network/Cookies-journal' },
+        { name: 'Cookies-wal', path: 'Network/Cookies-wal' },
         { name: 'Web Data', path: 'Web Data' },
         { name: 'Web Data-journal', path: 'Web Data-journal' },
         { name: 'Login Data', path: 'Login Data' },
@@ -325,8 +325,8 @@ async function syncBraveProfile(sourceProfile, destProfile) {
     
     console.log('[MCP-PLAYWRIGHT] ✅ Brave profile synced successfully.');
   } catch (error) {
-    console.error('[MCP-PLAYWRIGHT] ❌ Error syncing Brave profile:', error.message);
-    // Don't throw - allow the server to continue even if sync fails
+    // Throw the error so the caller knows sync failed
+    throw error;
   }
 }
 

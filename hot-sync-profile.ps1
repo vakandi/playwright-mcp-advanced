@@ -44,8 +44,9 @@ $essentialFiles = @(
     @{ Name = "Local State"; Path = "Local State"; DestDir = "User Data"; Required = $true },
     @{ Name = "Bookmarks"; Path = "Bookmarks"; DestDir = "Default"; Required = $false },
     @{ Name = "Bookmarks.bak"; Path = "Bookmarks.bak"; DestDir = "Default"; Required = $false },
-    @{ Name = "Cookies"; Path = "Network\Cookies"; DestDir = "Default"; Required = $false },
-    @{ Name = "Cookies-journal"; Path = "Network\Cookies-journal"; DestDir = "Default"; Required = $false }
+    @{ Name = "Cookies"; Path = "Network\Cookies"; DestDir = "Default"; Required = $false; PreservePath = $true },
+    @{ Name = "Cookies-journal"; Path = "Network\Cookies-journal"; DestDir = "Default"; Required = $false; PreservePath = $true },
+    @{ Name = "Cookies-wal"; Path = "Network\Cookies-wal"; DestDir = "Default"; Required = $false; PreservePath = $true }
 )
 
 # Copy essential files with retry logic
@@ -64,7 +65,12 @@ foreach ($file in $essentialFiles) {
     } else {
         # Other files are in Default directory
         $srcFile = Join-Path $SourceProfile $file.Path
-        $destFile = Join-Path $DestProfile $file.Name
+        # Preserve full path structure for files like Network\Cookies
+        if ($file.PreservePath) {
+            $destFile = Join-Path $DestProfile $file.Path
+        } else {
+            $destFile = Join-Path $DestProfile $file.Name
+        }
     }
     
     if (-not (Test-Path $srcFile)) {
@@ -97,6 +103,30 @@ foreach ($file in $essentialFiles) {
             }
         }
     }
+}
+
+# Copy Network directory with robocopy (handles locked files better) - CRITICAL for cookies
+$networkSrc = Join-Path $SourceProfile "Network"
+$networkDest = Join-Path $DestProfile "Network"
+
+if (Test-Path $networkSrc) {
+    Write-Host "[MCP-PLAYWRIGHT] Copying Network directory (contains cookies)..." -ForegroundColor Cyan
+    $robocopyResult = & robocopy "`"$networkSrc`"" "`"$networkDest`"" /E /COPY:DAT /R:$RetryCount /W:$RetryDelay /NFL /NDL /NP /NJH /NJS 2>&1
+    $robocopyExitCode = $LASTEXITCODE
+    
+    if ($robocopyExitCode -lt 8) {
+        $cookieFile = Join-Path $networkDest "Cookies"
+        if (Test-Path $cookieFile) {
+            Write-Host "[MCP-PLAYWRIGHT]   ✓ Network directory copied (Cookies file present)" -ForegroundColor Green
+            $copiedFiles += "Network"
+        } else {
+            Write-Host "[MCP-PLAYWRIGHT]   ⚠ Network directory copied but Cookies file not found" -ForegroundColor Yellow
+        }
+    } else {
+        Write-Host "[MCP-PLAYWRIGHT]   ⚠ Network directory copy had issues (exit code: $robocopyExitCode)" -ForegroundColor Yellow
+    }
+} else {
+    Write-Host "[MCP-PLAYWRIGHT]   ⚠ Network directory not found in source" -ForegroundColor Yellow
 }
 
 # Copy Extensions directory with robocopy (handles locked files better)
@@ -140,7 +170,12 @@ if ($robocopyExitCode -lt 8) {
         if ($file.DestDir -eq "User Data") {
             $checkPath = Join-Path $DestUserData $file.Name
         } else {
-            $checkPath = Join-Path $DestProfile $file.Name
+            # Preserve full path structure for files like Network\Cookies
+            if ($file.PreservePath) {
+                $checkPath = Join-Path $DestProfile $file.Path
+            } else {
+                $checkPath = Join-Path $DestProfile $file.Name
+            }
         }
         
         if (Test-Path $checkPath) {
@@ -154,6 +189,19 @@ if ($robocopyExitCode -lt 8) {
                 Write-Host "[MCP-PLAYWRIGHT]   ⚠ $($file.Name) (optional, not found)" -ForegroundColor Yellow
             }
         }
+    }
+    
+    # Check Network directory (Cookies)
+    if (Test-Path $networkDest) {
+        $cookieFile = Join-Path $networkDest "Cookies"
+        if (Test-Path $cookieFile) {
+            Write-Host "[MCP-PLAYWRIGHT]   ✓ Network\Cookies" -ForegroundColor Green
+            $verified += "Network\Cookies"
+        } else {
+            Write-Host "[MCP-PLAYWRIGHT]   ⚠ Network directory exists but Cookies file missing" -ForegroundColor Yellow
+        }
+    } else {
+        Write-Host "[MCP-PLAYWRIGHT]   ⚠ Network directory (not found)" -ForegroundColor Yellow
     }
     
     # Check Extensions
